@@ -77,6 +77,24 @@ runs single-worker on purpose: these specs drive one dev server and, in a media
 app, one set of native workers, and running them in parallel is what produced
 truncated screenshots and OOM kills.
 
+### Which server the specs drive
+
+`baseURL` and `webServer.url` come from `WEB_PORT` (or `VERIFY_BASE_URL`
+outright), defaulting to `http://127.0.0.1:3000`. That is not tidiness — it is
+what keeps a contended machine honest.
+
+A verification pass that finds ports 3000/8000 already held by a human's dev
+server for a *different* app boots the app under test on alternate ports rather
+than killing what is running. With a pinned base URL, `reuseExistingServer`
+would then find the *other* server answering on 3000, skip launching, and every
+relative `page.goto()` would drive somebody else's app while reporting findings
+about this one. Pass `WEB_PORT` whenever you did not land on 3000.
+
+`127.0.0.1` rather than `localhost`, for the same reason `pnpm wait-ready`
+probes both literals: on macOS `localhost` can resolve to `::1` first and miss a
+v4-only listener. A server this config launches inherits `PORT`, so it lands on
+the port the base URL points at.
+
 Shared fixtures live in `apps/web/e2e/fixtures/` and are imported relatively, so
 a spec runs on any machine and in CI:
 

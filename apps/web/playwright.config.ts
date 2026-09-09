@@ -14,6 +14,25 @@ import { defineConfig, devices } from "@playwright/test";
  * `chrome-headless-shell` class of breakage comes from. Here the browser, the
  * viewport, the server launch and the readiness wait are all configuration.
  */
+
+/**
+ * The origin every relative `page.goto()` resolves against.
+ *
+ * This is env-driven rather than pinned to `localhost:3000`, and that matters
+ * for more than tidiness. A verification pass that finds ports 3000/8000
+ * already held — by a human's dev server for a *different* app — boots the app
+ * under test on alternate ports instead of killing what is running. With a
+ * pinned base URL, `reuseExistingServer` would then find the *other* server
+ * answering on 3000, skip launching, and every relative navigation would drive
+ * somebody else's app while reporting findings about this one. Setting
+ * `WEB_PORT` (or `VERIFY_BASE_URL` outright) is what keeps that honest.
+ *
+ * `127.0.0.1`, not `localhost`: on macOS `localhost` can resolve to `::1`
+ * first and miss a v4-only listener entirely.
+ */
+const WEB_PORT = process.env.WEB_PORT ?? "3000";
+const BASE_URL = process.env.VERIFY_BASE_URL ?? `http://127.0.0.1:${WEB_PORT}`;
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -25,7 +44,7 @@ export default defineConfig({
   // a headless run blocking on a report server nobody is there to close.
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: BASE_URL,
     trace: "on-first-retry",
   },
   projects: [
@@ -52,7 +71,7 @@ export default defineConfig({
   ],
   webServer: {
     command: "pnpm dev",
-    url: "http://localhost:3000",
+    url: BASE_URL,
     // Never kill a dev server a human already had running; start one only when
     // there is none. `pnpm wait-ready` is the equivalent outside this runner.
     reuseExistingServer: !process.env.CI,
@@ -60,5 +79,8 @@ export default defineConfig({
     // A cold Next.js compile plus the API venv boot regularly exceeds
     // Playwright's 60s default, and that timeout reads as "the app is broken".
     timeout: 180_000,
+    // Next reads PORT, so a server this config launches lands on the same port
+    // the base URL points at rather than defaulting back to 3000.
+    env: { PORT: WEB_PORT },
   },
 });
