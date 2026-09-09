@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run --exclude \"e2e/**\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.e2e.json --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

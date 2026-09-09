@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-08-14 -->
+<!-- last_verified: 2026-09-09 -->
 # Verification
 
 What each gate actually checks, and how to recover when one fails. Read this
@@ -49,10 +49,68 @@ with a concurrently held `0.0.0.0` bind and would report a free port as busy.
 - **Structural**: layering rules, import boundaries (`tests/test_structure.py`)
 - **Contract**: checked-in OpenAPI artifact and frontend route drift
 - **E2E**: Playwright browser-driven smoke tests
+- **App verification**: throwaway, app-specific Playwright specs that drive a real browser through a real run
 
 ## Test placement
 - Backend: `services/api/tests/`
 - E2E: `apps/web/e2e/` with config in `apps/web/playwright.config.ts`
+- App verification specs: `apps/web/e2e/verify/` (gitignored), sharing the fixtures in `apps/web/e2e/fixtures/`
+
+## App verification specs
+
+`playwright.config.ts` declares two projects over one `e2e/` tree. `chromium`
+(`pnpm test:e2e`) is the kit's committed smoke suite. `verify`
+(`pnpm test:verify`) runs the throwaway, app-specific specs that a verification
+pass writes into `apps/web/e2e/verify/`.
+
+That directory is **gitignored**. Verification specs are evidence for one run,
+not part of the app, and a `git add -A` in an app built from this kit must not
+be able to sweep one into a commit.
+
+Running them inside the workspace is the point. A standalone script outside it
+has to resolve Playwright and its browser by hand, which is where the
+`executablePath` / `chrome-headless-shell` class of breakage comes from. As a
+project, the browser, the viewport (1440x900), the server launch and the
+readiness wait are all configuration — and `reuseExistingServer` means a dev
+server you already had running is reused, never killed. The `verify` project
+runs single-worker on purpose: these specs drive one dev server and, in a media
+app, one set of native workers, and running them in parallel is what produced
+truncated screenshots and OOM kills.
+
+### Which server the specs drive
+
+`baseURL` and `webServer.url` come from `WEB_PORT` (or `VERIFY_BASE_URL`
+outright), defaulting to `http://127.0.0.1:3000`. That is not tidiness — it is
+what keeps a contended machine honest.
+
+A verification pass that finds ports 3000/8000 already held by a human's dev
+server for a *different* app boots the app under test on alternate ports rather
+than killing what is running. With a pinned base URL, `reuseExistingServer`
+would then find the *other* server answering on 3000, skip launching, and every
+relative `page.goto()` would drive somebody else's app while reporting findings
+about this one. Pass `WEB_PORT` whenever you did not land on 3000.
+
+`127.0.0.1` rather than `localhost`, for the same reason `pnpm wait-ready`
+probes both literals: on macOS `localhost` can resolve to `::1` first and miss a
+v4-only listener. A server this config launches inherits `PORT`, so it lands on
+the port the base URL points at.
+
+Shared fixtures live in `apps/web/e2e/fixtures/` and are imported relatively, so
+a spec runs on any machine and in CI:
+
+| Export | What it saves you writing |
+|---|---|
+| `test` / `diagnostics` | A page already collecting console errors, uncaught page exceptions, failed requests, and 4xx/5xx responses — attached *before* the first navigation, so nothing is missed |
+| `waitForTerminal` | The bounded wait every run needs: a deadline, a poll, and a mid-wait screenshot hook so a stalled run still leaves evidence |
+| `safeShot` | A screenshot that never fails the run, with an optional `maxHeight` so a tall page does not produce a giant capture |
+| `affordances` | An app-agnostic scrape of what a screen offers — headings, in-app links, buttons, inputs, selects, file inputs — answering navigation questions from the DOM instead of from an image |
+| `assertMediaPaints` | Proof that an `<img>`/`<video>` actually paints, not merely that it is in the DOM |
+| `selectShadcnOption`, `uploadFile`, `waitForStage` | The shadcn/Radix interactions whose selectors are easy to get subtly wrong |
+| `noteVerify` | One JSONL line into the run's sidecar, fire-and-forget |
+
+Keep the app-specific half in the spec: the route list, this app's control names
+and selectors, the completion predicate, the asset path, and the domain
+assertions.
 
 ## Pre-commit
 

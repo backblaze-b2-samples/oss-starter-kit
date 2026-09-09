@@ -47,6 +47,13 @@ coverage/
 playwright-report/
 test-results/
 
+# Throwaway, app-specific verification specs. A verification pass writes these
+# into the workspace so they run under playwright.config.ts (real browser
+# resolution, real webServer readiness) instead of as standalone scripts — but
+# they are scratch evidence for one run, never part of the app. Ignored so a
+# `git add -A` in the app's own repo cannot sweep one into a commit.
+apps/web/e2e/verify/
+
 # B2 / AWS
 .aws/
 

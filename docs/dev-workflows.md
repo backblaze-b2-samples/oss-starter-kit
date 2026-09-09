@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-08-14 -->
+<!-- last_verified: 2026-09-09 -->
 # Dev Workflows
 
 Engineering workflows for this repo: the command index, the per-task checklists,
@@ -26,6 +26,7 @@ and the release process. Two companion docs carry the reference material:
 - Frontend lint: `pnpm lint`
 - Backend lint: `pnpm lint:api`
 - E2E: `pnpm test:e2e` (run `pnpm --filter @vibe-coding-starter-kit/web exec playwright install chromium` once first)
+- App verification specs: `pnpm test:verify` (specs in the gitignored `apps/web/e2e/verify/`)
 
 What each gate checks, its prerequisites, and how to recover when one fails:
 [verification.md](verification.md).
