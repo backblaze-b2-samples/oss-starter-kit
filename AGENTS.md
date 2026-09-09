@@ -128,7 +128,8 @@ pnpm lint:api          # backend lint (ruff)
 pnpm test:api          # backend tests (pytest)
 pnpm test:live:b2      # opt-in real B2 connectivity test (requires explicit flag)
 pnpm check:structure   # structural boundary tests
-pnpm test:e2e          # Playwright e2e tests
+pnpm test:e2e          # the kit's own Playwright smoke suite (project: chromium)
+pnpm test:verify       # throwaway app verification specs in apps/web/e2e/verify/ (project: verify)
 ```
 
 `setup` and `doctor` use the `pnpm run` form on purpose: both are built-in pnpm

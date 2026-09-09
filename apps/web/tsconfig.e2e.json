@@ -1,0 +1,14 @@
+{
+  // The app's tsconfig deliberately excludes `e2e/` and `playwright.config.ts`:
+  // they are not part of the Next.js build. But Playwright transpiles TS with
+  // esbuild and never type-checks it, so without this config the shared
+  // fixtures in `e2e/fixtures/` would be the one piece of shipped TypeScript
+  // that nothing checks. `pnpm typecheck` runs both.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["e2e/**/*.ts", "playwright.config.ts"],
+  "exclude": ["node_modules", "e2e/verify/**"]
+}

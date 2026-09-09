@@ -217,6 +217,7 @@ The commands you reach for day to day:
 | `pnpm dev` | Start frontend + backend (runs the `pnpm run doctor` preflight first) |
 | `pnpm verify` | Credential-free pre-PR suite — runs `check:agent-docs`, `verify:api`, then `verify:web` |
 | `pnpm verify:full` | `pnpm verify` plus Playwright E2E; needs a live local stack, real `.env`, free port 3000, and Chromium |
+| `pnpm test:verify` | Run throwaway verification specs from `apps/web/e2e/verify/` against the app, with the shared browser fixtures |
 | `pnpm contract:export` / `pnpm contract:check` | Export / verify the FastAPI OpenAPI contract in `docs/api/openapi.json` |
 
 `pnpm verify` is the gate to run before opening a PR. It needs

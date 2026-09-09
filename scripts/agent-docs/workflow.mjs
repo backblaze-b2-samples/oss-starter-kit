@@ -57,6 +57,7 @@ const DOCUMENTED_COMMANDS = [
   "pnpm verify:api",
   "pnpm verify:web",
   "pnpm verify:full",
+  "pnpm test:verify",
 ];
 
 /** Scripts that must keep pointing at the file the docs send readers to. */
