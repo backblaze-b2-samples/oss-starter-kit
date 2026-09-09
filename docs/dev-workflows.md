@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-08-14 -->
+<!-- last_verified: 2026-09-09 -->
 # Dev Workflows
 
 Engineering workflows for this repo: the command index, the per-task checklists,
@@ -13,6 +13,7 @@ and the release process. Two companion docs carry the reference material:
 - Agent docs health: `pnpm check:agent-docs`
 - Cold-start setup: `pnpm run setup`
 - Preflight environment check: `pnpm run doctor`
+- Wait for the running stack: `pnpm wait-ready`
 - API contract export: `pnpm contract:export`
 - API contract drift check: `pnpm contract:check`
 - Canonical pre-PR suite: `pnpm verify`

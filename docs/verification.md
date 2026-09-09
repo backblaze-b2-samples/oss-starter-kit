@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-08-14 -->
+<!-- last_verified: 2026-09-09 -->
 # Verification
 
 What each gate actually checks, and how to recover when one fails. Read this
@@ -42,6 +42,31 @@ the port as free or exhausted. A missing IPv6 stack is reported as neither: the
 ignore so an IPv6-less container still starts. Doctor also probes the two
 wildcards one after the other, because a dual-stack `::` bind on Linux collides
 with a concurrently held `0.0.0.0` bind and would report a free port as busy.
+
+## Waiting for the local stack
+
+`pnpm wait-ready` blocks until the running app actually answers, then prints one
+line and exits 0. Use it instead of a fixed `sleep` before driving the app with
+Playwright, curl, or a screenshot run: a sleep is simultaneously too long on a
+warm machine and too short during a cold Next.js compile.
+
+It probes `GET /health` on the API and `GET /` on the web app, over `127.0.0.1`
+and `::1` so a v4-only uvicorn is not missed by a name lookup that resolves to
+IPv6 first. With no explicit port it scans the same ranges the kit really uses —
+web 3000-3009 (Next's own fallback) and API 8000-8009
+([`scripts/pick-port.mjs`](../scripts/pick-port.mjs)) — so `--web-port` /
+`--api-port` (or `WEB_PORT` / `API_PORT`, which `scripts/dev.sh` already
+exports) are an optimisation, not a requirement. An explicit port is
+authoritative and its neighbours are not probed, so it cannot silently pass
+against some other app you left running.
+
+The deadline defaults to 120 seconds (`--timeout`, or `WAIT_READY_TIMEOUT`).
+Exit codes match the split [`scripts/local-bind.mjs`](../scripts/local-bind.mjs)
+makes for binds: `1` means nothing answered before the deadline, and `2` means
+the sandbox denied the connection outright (`EACCES`/`EPERM`), which no amount
+of waiting fixes — grant local network permission instead. A `degraded` health
+response still counts as ready: the app is serving and B2 connectivity is the
+thing to go look at, not the boot.
 
 ## Test types
 - **Unit**: pure logic (service layer)

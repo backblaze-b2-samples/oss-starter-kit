@@ -111,6 +111,7 @@ pnpm run doctor        # preflight environment check (also runs before pnpm dev)
 pnpm dev               # start both frontend and backend
 pnpm dev:web           # frontend only
 pnpm dev:api           # backend only
+pnpm wait-ready        # block until web + API answer, then exit (no sleep/curl polling)
 pnpm contract:export   # export deterministic FastAPI OpenAPI JSON
 pnpm contract:check    # check OpenAPI artifact + frontend client routes
 

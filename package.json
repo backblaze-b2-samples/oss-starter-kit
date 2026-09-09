@@ -13,6 +13,7 @@
     "contract:export": "services/api/.venv/bin/python services/api/scripts/export_openapi.py",
     "contract:check": "services/api/.venv/bin/python services/api/scripts/export_openapi.py --check && pnpm --filter @vibe-coding-starter-kit/web exec vitest run src/lib/api-contract.test.ts",
     "check:agent-docs": "node scripts/check-agent-docs.mjs",
+    "wait-ready": "node scripts/wait-ready.mjs",
     "verify": "pnpm check:agent-docs && pnpm verify:api && pnpm verify:web",
     "verify:api": "pnpm lint:api && pnpm test:api && pnpm check:structure",
     "verify:web": "pnpm lint && pnpm test:web && pnpm build",

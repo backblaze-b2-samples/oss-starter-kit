@@ -51,6 +51,7 @@ const CI_JOBS = ["verify-agent-docs", "verify-api", "verify-web"];
 const DOCUMENTED_COMMANDS = [
   "pnpm run setup",
   "pnpm check:agent-docs",
+  "pnpm wait-ready",
   "pnpm contract:export",
   "pnpm contract:check",
   "pnpm verify",
@@ -64,6 +65,7 @@ const SCRIPT_ENTRY_POINTS = {
   "check:agent-docs": "scripts/check-agent-docs.mjs",
   setup: "scripts/setup.mjs",
   doctor: "scripts/doctor.mjs",
+  "wait-ready": "scripts/wait-ready.mjs",
 };
 
 /** Whole-token match, so `pnpm verify` never matches `pnpm verify:api`. */
